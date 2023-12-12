@@ -1,0 +1,8 @@
+fastapi
+sqlalchemy
+passlib
+python-jose
+uvicorn
+python-multipart
+uuid
+psycopg2
