@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from .. import database, models
 
 router = APIRouter(
@@ -12,32 +12,36 @@ def get_all_genre(db : database.db_dependency):
 
 @router.post('/genre/create/{genre}')
 def create_genre(db : database.db_dependency, genre : str):
+    genre_instance = db.query(models.Genre).filter(models.Genre.genreName == genre).first()
+    if genre_instance:
+        raise HTTPException(status_code=status.HTTP_302_FOUND, detail="Genre Already Exists!")
     db_genre = models.Genre(genreName = genre)
     db.add(db_genre)
     db.commit()
     db.refresh(db_genre)
-    return db_genre
+    raise HTTPException(status_code=status.HTTP_200_OK, detail="Genre Created Successfully")
 
 @router.put('/genre/edit/{genreId}/{editName}')
 def edit_genre(db : database.db_dependency, genreId : int, editName : str):
     genre_instance = db.query(models.Genre).filter(models.Genre.id == genreId).first()
     if not genre_instance:
         raise HTTPException(status_code=404, detail="Genre Id Not Found")
-    else:
-        genre_instance.genreName = editName
-        db.commit()
-        db.refresh(genre_instance)
-        return genre_instance
+    genre_instance = db.query(models.Genre).filter(models.Genre.genreName == editName).first()
+    if genre_instance:
+        raise HTTPException(status_code=status.HTTP_302_FOUND, detail="Genre Already Exists!")
+    genre_instance.genreName = editName
+    db.commit()
+    db.refresh(genre_instance)
+    raise HTTPException(status_code=status.HTTP_200_OK, detail="Genre Updated Successfully")
     
 @router.delete('/genre/delete/{genreId}')
 def delete_genre(db : database.db_dependency, genreId : int):
     genre_instance = db.query(models.Genre).filter(models.Genre.id == genreId).first()
     if not genre_instance:
         raise HTTPException(status_code=404, detail="Genre Id Not Found")
-    else:
-        db.delete(genre_instance)
-        db.commit()
-        return genre_instance
+    db.delete(genre_instance)
+    db.commit()
+    raise HTTPException(status_code=status.HTTP_200_OK, detail="Genre deleted Successfully")
 
 
 

@@ -40,7 +40,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        print(token, "here")
+        # print(token, "here")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("username")
         if username is None:
@@ -80,7 +80,7 @@ async def login_token(request : Annotated[OAuth2PasswordRequestForm, Depends()],
 def create_user(request:schemas.CreateUser, db: database.db_dependency):
     if request.password == request.confirmation:
         hash_pass = generate_hash(request.password)
-        db_user = models.Users(username = request.username, passwordHash = hash_pass)
+        db_user = models.Users(username = request.username, passwordHash = hash_pass, role = request.role)
         db.add(db_user)
         db.commit()
         db.refresh(db_user)

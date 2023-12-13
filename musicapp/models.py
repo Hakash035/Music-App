@@ -8,8 +8,6 @@ class Songs(Base):
     id = Column(Integer, primary_key=True, index=True)
     songName = Column(String)
     # fileName = Column(String)
-    rating = Column(Float, default=0.0)
-    noOfUsersRated = Column(Integer, default=0)
     artistId = Column(Integer, ForeignKey("artist.id", ondelete="CASCADE"))
     genreId = Column(Integer, ForeignKey("genre.id"))
     albumId = Column(Integer, ForeignKey("album.id", ondelete="CASCADE"))
@@ -18,6 +16,7 @@ class Songs(Base):
     genre = relationship("Genre", back_populates="songs")
     album = relationship("Album", back_populates="songs")
     playlistSong = relationship("PlaylistSong", back_populates="songs")
+    rating = relationship("Rating", back_populates="songs")
     
 
 class Users(Base):
@@ -25,9 +24,11 @@ class Users(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String)
+    role = Column(Integer) # 1 - admin, 2 - user
     passwordHash = Column(String)
 
     playlists = relationship("Playlist", back_populates="users", cascade="all, delete")
+    rating = relationship("Rating", back_populates="users")
 
 class Playlist(Base):
     __tablename__ = "playlists"
@@ -73,5 +74,16 @@ class Album(Base):
     albumName = Column(String)
     artistId = Column(Integer, ForeignKey("artist.id", ondelete="CASCADE"))
 
-    songs = relationship("Songs", back_populates="album", cascade="all, delete")
     artist = relationship("Artist", back_populates="album")
+    songs = relationship("Songs", back_populates="album")
+
+class Rating(Base):
+    __tablename__ = "rating"
+
+    id = Column(Integer, primary_key=True, index=True)
+    rating = Column(Float, default=0) 
+    songId = Column(Integer, ForeignKey("songs.id"))
+    byUserId = Column(Integer, ForeignKey("users.id"))
+
+    users = relationship("Users", back_populates="rating")
+    songs = relationship("Songs", back_populates="rating")

@@ -7,6 +7,7 @@ class SongSchema(BaseModel):
 
 class CreateUser(BaseModel):
     username : str
+    role : int
     password : str
     confirmation : str
 
@@ -16,7 +17,6 @@ class Login(BaseModel):
 
 class Playlist(BaseModel):
     playlistName : str
-    listOfSongs : list
 
 class Token(BaseModel):
     access_token: str
@@ -61,11 +61,13 @@ class User(BaseModel):
     id : int
     username : str
 
-
+class ShowRatingInfo(BaseModel):
+    rating : float
+    byUserId : User
 
 class ShowSong(BaseModel):
     songName : str
-    rating : float
+    # rating : ShowRatingInfo
     artist : Artist
     genre : Genre
     album : Album
@@ -102,3 +104,9 @@ class ShowArtistDetails(BaseModel):
     artistName : str
     songs : List[ShowSong]
     album : List[AlbumInfo]
+
+class EditSongRequest(BaseModel):
+    songName : str
+    artistId : int
+    genreId : int
+    albumId : int
