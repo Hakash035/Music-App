@@ -17,11 +17,10 @@ def get_user_playlist(db: database.db_dependency, user : user_dep):
 
 @router.get("/playlist/info/{playlistId}", response_model=schemas.ShowPlaylistInfo, status_code=200)
 def show_all_songs(db : database.db_dependency, playlistId : int, user : user_dep):
-    user_playlist = db.query(models.Users).filter(models.Users.id == user['id']).first()
     playlist = db.query(models.Playlist).filter(models.Playlist.id == playlistId).first()
     if not playlist:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Playlist Doesn't Exists!")
-    if playlist not in user_playlist.playlists:
+    if playlist.users.id == user['id']:
         raise  HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Playlist is Not Accessable!")
     return playlist
 
@@ -52,7 +51,9 @@ def create_by_condition(
     artists: list[str] = Query(None, title="List of artists", description="Specify one or more artists"),
     genres: list[str] = Query(None, title="List of genres", description="Specify one or more genres"),
 ):
-    
+    playlist = db.query(models.Playlist).filter(models.Playlist.playlistName == request.playlistName).first()
+    if playlist:
+        raise HTTPException(status_code=status.HTTP_302_FOUND, detail="Playlist Already Exists!")
     combination = list(product(artists, genres))
     res = []
     for pair in combination:
@@ -90,7 +91,6 @@ def create_by_condition(
 
     es.index(index="playlist", body = document)
 
-    return res
     raise HTTPException(status_code=status.HTTP_201_CREATED, detail="Playlist Created Successfully" )
 
 # add songs to playlist

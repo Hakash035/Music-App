@@ -17,9 +17,12 @@ def get_album(db : database.db_dependency, albumId : int):
 def create_album(db : database.db_dependency, albumName : str, artistId : int, user : user_dep):
     if user['role'] != 1:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Only Admins can create album!")
+    album = db.query(models.Album).filter(models.Album.albumName == albumName, models.Album.artistId == artistId).first()
+    if album:
+        raise HTTPException(status_code=status.HTTP_302_FOUND, detail="Album Already Exists")
     album = models.Album(albumName = albumName, artistId = artistId)
     db.add(album)
-    db.commit()
+    db.commit() 
     db.refresh(album)
     raise HTTPException(status_code=status.HTTP_200_OK, detail="Album Created Succesfully")
 

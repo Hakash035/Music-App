@@ -4,10 +4,12 @@ from sqlalchemy.orm import sessionmaker, Session
 from typing import Annotated
 from fastapi import Depends
 from elasticsearch import Elasticsearch
+import os
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:1234@localhost:5432/musicApp"
+load_dotenv()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(os.environ.get("SQLALCHEMY_DATABASE_URL"))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -22,5 +24,7 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 #ElasticSearch Config
-ELASTICSEARCH_URL = "https://localhost:9200"
-es = Elasticsearch(hosts=ELASTICSEARCH_URL, basic_auth=("elastic", "c9EzKcChn*OWBX86a0ZD"), verify_certs=False)
+ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL")
+ELASTICSEARCH_USER = os.environ.get("ELASTICSEARCH_USER")
+ELASTICSEARCH_PASSWORD = os.environ.get("ELASTICSEARCH_PASSWORD")
+es = Elasticsearch(hosts=ELASTICSEARCH_URL, basic_auth=(ELASTICSEARCH_USER, ELASTICSEARCH_PASSWORD), verify_certs=False)

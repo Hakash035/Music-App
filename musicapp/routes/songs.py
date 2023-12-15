@@ -67,6 +67,13 @@ def edit_song(db : database.db_dependency, songId : int, req : schemas.EditSongR
     song.genreId = req.genreId
     db.commit()
     db.refresh(song)
+    document = {
+        "songName" : song.songName,
+        "artistName" : song.artist.artistName,
+        "genreName" : song.genre.genreName,
+        "albumName" : song.album.albumName
+    }
+    response = es.update(index="songs", id = song.id, doc = document)
     raise HTTPException(status_code=status.HTTP_200_OK, detail="Song Updated Successfully!")
     
 @router.delete('/song/delete/{songId}')

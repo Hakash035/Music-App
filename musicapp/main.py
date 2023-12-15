@@ -1,8 +1,8 @@
-from fastapi import FastAPI, UploadFile, HTTPException, status
-from .database import es
-from .routes import playlist, rating, songs, auth, genre, artist, album, search
-from . import models, database
 import csv
+from fastapi import FastAPI, UploadFile, HTTPException, status
+from . import models, database
+from .routes import playlist, rating, songs, auth, genre, artist, album, search
+from .database import es
 
 app = FastAPI()
 app.include_router(playlist.router)
@@ -14,17 +14,14 @@ app.include_router(genre.router)
 app.include_router(artist.router)
 app.include_router(album.router)
 
-# Index name
+
 index_name = "songs"
 
-# Check if the index exists, if not, create it
 if not es.indices.exists(index=index_name):
     es.indices.create(index=index_name)
 
-# Index name
 index_name = "playlist"
 
-# Check if the index exists, if not, create it
 if not es.indices.exists(index=index_name):
     es.indices.create(index=index_name)
 
@@ -42,7 +39,6 @@ async def index(file : UploadFile, db : database.db_dependency):
     csv_lines = csv.reader(content_str.splitlines())
     
     for row in csv_lines:
-        #songName,artistName,albumName,genreName
 
         artist = db.query(models.Artist).filter(models.Artist.artistName == row[1]).first()
         if not artist:
@@ -78,11 +74,3 @@ async def index(file : UploadFile, db : database.db_dependency):
         response = es.index(index="songs", body=document, id=song_instance.id)
     
     raise HTTPException(status_code=status.HTTP_200_OK, detail="The Data is Added Successfully!")
-
-
-# @app.delete("/user/delete/{userId}")
-# def del_user(userId : int, db: database.db_dependency):
-#     user = db.query(models.Users).filter(models.Users.id == userId).first()
-#     db.delete(user)
-#     db.commit()
-#     return "success"

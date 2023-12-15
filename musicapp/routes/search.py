@@ -46,14 +46,14 @@ def recommend_song(user : user_dep, db : database.db_dependency):
                 "_id" : rec.songId
             }
             allSongs.append(record)
-    print(allSongs)
     query = {
         "query" : {
             "more_like_this" : {
                 "fields" : ["artistName", "albumName", "genreName"],
                 "like" : allSongs,
                 "min_term_freq": 1,
-                "max_query_terms": 4
+                "max_query_terms": 6,
+                "min_doc_freq" : 1
             }
         }
     }

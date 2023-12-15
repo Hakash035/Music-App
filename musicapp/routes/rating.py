@@ -18,7 +18,8 @@ def get_rating(songId : int, db : database.db_dependency):
         .filter(models.Rating.songId == songId)
         .scalar()
     )
-
+    if average_rating == None:
+        average_rating = 0
     return {"rating" : average_rating}
 
 @router.post('/rate/{songId}/{rating}')
@@ -47,7 +48,6 @@ def edit_rating(user: auth.user_dep, songId : int, rating : float, db : database
     rating_instance = db.query(models.Rating).filter(models.Rating.byUserId == user['id'], models.Rating.songId == songId).first()
     if not rating_instance:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You Haven't Rated this song yet!")
-    rating_instance = db.query(models.Rating).filter(models.Rating.byUserId == user['id'], models.Rating.songId == songId).first()
     rating_instance.rating = rating
     db.commit()
     db.refresh(rating_instance)

@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .. import schemas, models, database
 from passlib.context import CryptContext
+import os
 
 router = APIRouter(
     tags = ["Auth"]
@@ -21,8 +22,8 @@ def verify_password(hashed_pass, plain_text):
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = "247a39a660e0bd66be91493d7887ce1ba1f964e3c94462443275b1e4edf45840"
-ALGORITHM = "HS256"
+SECRET_KEY = os.environ.get("SECRET_KEY")
+ALGORITHM = os.environ.get("ALGORITHM")
 
 # creating the access token (JWT)
 def create_access_token(data: dict):
@@ -40,7 +41,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        # print(token, "here")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("username")
         if username is None:
