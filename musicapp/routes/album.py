@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from .. import database, models, schemas
+from .auth import user_dep
 
 router = APIRouter(
     tags = ["Album"]
@@ -13,7 +14,9 @@ def get_album(db : database.db_dependency, albumId : int):
     return album
 
 @router.post('/album/create/{artistId}/{albumName}')
-def create_album(db : database.db_dependency, albumName : str, artistId : int):
+def create_album(db : database.db_dependency, albumName : str, artistId : int, user : user_dep):
+    if user['role'] != 1:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Only Admins can create album!")
     album = models.Album(albumName = albumName, artistId = artistId)
     db.add(album)
     db.commit()
@@ -21,7 +24,9 @@ def create_album(db : database.db_dependency, albumName : str, artistId : int):
     raise HTTPException(status_code=status.HTTP_200_OK, detail="Album Created Succesfully")
 
 @router.put('/album/update/{albumId}/{name}')
-def update_album(db : database.db_dependency, name : str, albumId : int):
+def update_album(db : database.db_dependency, name : str, albumId : int, user : user_dep):
+    if user['role'] != 1:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Only Admins can update album!")
     album = db.query(models.Album).filter(models.Album.id == albumId).first()
     if not album:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Album Not Found")
@@ -31,7 +36,9 @@ def update_album(db : database.db_dependency, name : str, albumId : int):
     raise HTTPException(status_code=status.HTTP_200_OK, detail="Album Updated Successfully")
 
 @router.delete('/album/delete/{albumId}')
-def delete_album(db : database.db_dependency, albumId : int):
+def delete_album(db : database.db_dependency, albumId : int, user : user_dep):
+    if user['role'] != 1:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Only Admins can delete album!")
     album = db.query(models.Album).filter(models.Album.id == albumId).first()
     if not album:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Album Not Found")

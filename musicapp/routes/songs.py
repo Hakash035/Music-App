@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status #, UploadFile
 from .. import database, schemas, models
 from ..database import es
+from .auth import user_dep
 # from uuid import uuid4
 
 router = APIRouter(
@@ -15,7 +16,7 @@ def show_song(db : database.db_dependency, songId : int):
     return song
 
 @router.put('/song/upload', response_model=schemas.ShowSong)
-async def upload_songs(db : database.db_dependency, songName : str, genreId : int, artistId : int, albumId : int):
+async def upload_songs(db : database.db_dependency, songName : str, genreId : int, artistId : int, albumId : int, user : user_dep):
     # , file : UploadFile
     # file_id = uuid4()
     # data = await file.read()
@@ -25,6 +26,8 @@ async def upload_songs(db : database.db_dependency, songName : str, genreId : in
     #     file_object.write(data)
     # file_object.close()
     #  fileName = file_name,
+    if user['role'] != 1:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Only Admins can create song!")
     song = db.query(models.Songs).filter(models.Songs.songName == songName).first()
     if song:
         raise HTTPException(status_code=status.HTTP_302_FOUND, detail="Song already Exists!")
@@ -47,7 +50,9 @@ async def upload_songs(db : database.db_dependency, songName : str, genreId : in
     raise HTTPException(status_code=status.HTTP_200_OK, detail="Song is Added to the Database")
 
 @router.put('/song/edit/{songId}')
-def edit_song(db : database.db_dependency, songId : int, req : schemas.EditSongRequest):
+def edit_song(db : database.db_dependency, songId : int, req : schemas.EditSongRequest, user : user_dep):
+    if user['role'] != 1:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Only Admins can update song!")
     song = db.query(models.Songs).filter(models.Songs.id == songId).first()
     if not song:
         raise HTTPException(status_code=404, detail="Song Id Not Found")
@@ -65,7 +70,9 @@ def edit_song(db : database.db_dependency, songId : int, req : schemas.EditSongR
     raise HTTPException(status_code=status.HTTP_200_OK, detail="Song Updated Successfully!")
     
 @router.delete('/song/delete/{songId}')
-def delete_genre(db : database.db_dependency, songId : int):
+def delete_genre(db : database.db_dependency, songId : int, user : user_dep):
+    if user['role'] != 1:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Only Admins can delete song!")
     song = db.query(models.Songs).filter(models.Songs.id == songId).first()
     if not song:
         raise HTTPException(status_code=404, detail="Song Id Not Found")

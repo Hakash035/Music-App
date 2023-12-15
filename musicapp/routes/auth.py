@@ -65,7 +65,7 @@ async def login_token(request : Annotated[OAuth2PasswordRequestForm, Depends()],
     if user:
        hash_pass = verify_password(user.passwordHash, request.password)
        if hash_pass:
-        token = create_access_token({"username" : user.username, "id" : user.id})
+        token = create_access_token({"username" : user.username, "id" : user.id, "role" : user.role})
 
         return {"access_token" : token, "token_type" : "bearer"}
        else:

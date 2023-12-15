@@ -110,3 +110,6 @@ class EditSongRequest(BaseModel):
     artistId : int
     genreId : int
     albumId : int
+
+class CreateByCondition(BaseModel):
+    playlist : str
