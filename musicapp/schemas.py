@@ -1,23 +1,8 @@
 from pydantic import BaseModel
 from typing import List
 
-class SongSchema(BaseModel):
-    songname : str
-    url : str
 
-class CreateUser(BaseModel):
-    username : str
-    role : int
-    password : str
-    confirmation : str
-
-class Login(BaseModel):
-    username : str
-    password : str
-
-class Playlist(BaseModel):
-    playlistName : str
-
+# Pydantic Models for Authentication
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -25,17 +10,14 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str | None = None
 
-class Song(BaseModel):
-    songName : str
-    genreName : str
-    artistName : str
+class CreateUser(BaseModel):
+    username : str
+    role : int
+    password : str
+    confirmation : str
 
-class Recommend(BaseModel):
-    byUser: str
-    toUser: str
-    typeOfSuggestion : str
-    SuggestedItem: str
 
+# Below classes are defined for response model
 class Artist(BaseModel):
     id : int
     artistName : str
@@ -67,7 +49,6 @@ class ShowRatingInfo(BaseModel):
 
 class ShowSong(BaseModel):
     songName : str
-    # rating : ShowRatingInfo
     artist : Artist
     genre : Genre
     album : Album
@@ -89,7 +70,6 @@ class PlaylistSongs(BaseModel):
     class Config:
         orm_mode = True
 
-
 class ShowPlaylistInfo(BaseModel):
     id : int
     playlistName : str
@@ -105,11 +85,16 @@ class ShowArtistDetails(BaseModel):
     songs : List[ShowSong]
     album : List[AlbumInfo]
 
+
+# Below are Request Body Schemas
+class CreateByCondition(BaseModel):
+    playlist : str
+
 class EditSongRequest(BaseModel):
     songName : str
     artistId : int
     genreId : int
     albumId : int
 
-class CreateByCondition(BaseModel):
-    playlist : str
+class Playlist(BaseModel):
+    playlistName : str

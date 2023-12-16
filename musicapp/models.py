@@ -1,13 +1,14 @@
-from sqlalchemy import ARRAY, Column, Integer, String, Float, Boolean, ForeignKey
-from .database import Base
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
+from .database import Base
+
 
 class Songs(Base):
     __tablename__ = "songs"
 
     id = Column(Integer, primary_key=True, index=True)
     songName = Column(String)
-    # fileName = Column(String)
+    fileName = Column(String)
     artistId = Column(Integer, ForeignKey("artist.id", ondelete="CASCADE"))
     genreId = Column(Integer, ForeignKey("genre.id"))
     albumId = Column(Integer, ForeignKey("album.id", ondelete="CASCADE"))
@@ -30,6 +31,7 @@ class Users(Base):
     playlists = relationship("Playlist", back_populates="users", cascade="all, delete")
     rating = relationship("Rating", back_populates="users")
 
+
 class Playlist(Base):
     __tablename__ = "playlists"
 
@@ -39,6 +41,7 @@ class Playlist(Base):
 
     playlistSong = relationship("PlaylistSong", back_populates="playlists", cascade="all, delete")
     users = relationship("Users", back_populates="playlists")
+
 
 class PlaylistSong(Base):
     __tablename__ = "playlistSong"
@@ -50,6 +53,7 @@ class PlaylistSong(Base):
     playlists = relationship("Playlist", back_populates="playlistSong")
     songs = relationship("Songs", back_populates="playlistSong")
 
+
 class Artist(Base):
     __tablename__ = "artist"
 
@@ -59,6 +63,7 @@ class Artist(Base):
     songs = relationship("Songs", back_populates="artist", cascade="all, delete")
     album = relationship("Album", back_populates='artist', cascade="all, delete")
 
+
 class Genre(Base):
     __tablename__ = "genre"
 
@@ -66,6 +71,7 @@ class Genre(Base):
     genreName = Column(String)
 
     songs = relationship("Songs", back_populates="genre")
+
 
 class Album(Base):
     __tablename__ = "album"
@@ -76,6 +82,7 @@ class Album(Base):
 
     artist = relationship("Artist", back_populates="album")
     songs = relationship("Songs", back_populates="album")
+
 
 class Rating(Base):
     __tablename__ = "rating"
