@@ -21,7 +21,7 @@
 
 ## DB Schema :
 
-Database Schema caan be found in the below link
+Database Schema can be found in the below link
 
 https://drawsql.app/teams/hakashs-team/diagrams/onboarding-task
 
