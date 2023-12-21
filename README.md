@@ -19,6 +19,12 @@
  - PosgreSQL
  - Elastic Search
 
+## DB Schema :
+
+Database Schema caan be found in the below link
+
+https://drawsql.app/teams/hakashs-team/diagrams/onboarding-task
+
 ## Authentication
 
 The project is build on OAuth2 i.e password hashing, JWT Tokens. 
