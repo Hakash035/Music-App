@@ -25,6 +25,25 @@ Database Schema caan be found in the below link
 
 https://drawsql.app/teams/hakashs-team/diagrams/onboarding-task
 
+## Elastic Search : 
+
+For elastic search , there are 2 index 
+ - songs
+ - playlist
+
+The Document in Songs will be of below format :
+ - id( same as document ID )
+ - songName
+ - artistName
+ - albumName
+ - genreName
+
+The Document in Songs will be of below format :
+ - playlistId( same as document ID )
+ - playlistName
+ - creator( User ID )
+ - playlistSong( array of songs )
+
 ## Authentication
 
 The project is build on OAuth2 i.e password hashing, JWT Tokens. 
