@@ -43,10 +43,10 @@ def get_artist_info(
     return artist
 
 
-@router.post('/create/{artist}')
+@router.post('/create')
 def create_artist(
         db: database.db_dependency, 
-        artist: str, 
+        request : schemas.PostArtist, 
         user: user_dep
     ):
 
@@ -73,7 +73,7 @@ def create_artist(
         )
 
     # Check if the artist with the given name already exists
-    existing_artist = db.query(models.Artist).filter(models.Artist.artistName == artist).first()
+    existing_artist = db.query(models.Artist).filter(models.Artist.artistName == request.artist).first()
     if existing_artist:
         raise HTTPException(
             status_code=status.HTTP_302_FOUND, 
@@ -81,7 +81,7 @@ def create_artist(
         )
 
     # Create a new artist instance
-    new_artist = models.Artist(artistName=artist)
+    new_artist = models.Artist(artistName=request.artist)
 
     # Add the new artist to the database
     db.add(new_artist)
@@ -92,11 +92,10 @@ def create_artist(
     return {"detail": "Artist Created Successfully"}
 
 
-@router.put('/update/{artistId}/{name}')
+@router.put('/update')
 def update_artist(
         db: database.db_dependency, 
-        artistId: int, 
-        name: str, 
+        request: schemas.EditArtist,
         user: user_dep
     ):
 
@@ -124,7 +123,7 @@ def update_artist(
         )
 
     # Retrieve the artist by ID
-    artist = db.query(models.Artist).filter(models.Artist.id == artistId).first()
+    artist = db.query(models.Artist).filter(models.Artist.id == request.artistId).first()
 
     # Check if the artist exists
     if not artist:
@@ -134,7 +133,7 @@ def update_artist(
         )
     
     # Retrieve the artist by Name
-    artist = db.query(models.Artist).filter(models.Artist.artistName == name).first()
+    artist = db.query(models.Artist).filter(models.Artist.artistName == request.name).first()
 
     # Check if the artist exists
     if artist:
@@ -144,7 +143,7 @@ def update_artist(
         )
 
     # Update the artist name
-    artist.artistName = name
+    artist.artistName = request.name
     db.commit()
     db.refresh(artist)
 

@@ -1,10 +1,24 @@
 import csv
 from fastapi import FastAPI, UploadFile, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from . import models, database
 from .routes import playlist, rating, songs, auth, genre, artist, album, search
 from .database import es
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include routers for different endpoints
 app.include_router(playlist.router)
@@ -28,7 +42,7 @@ models.Base.metadata.create_all(database.engine)
 
 
 @app.post('/dump')
-async def index(file: UploadFile, db: database.db_dependency):
+async def dump_csv_file(file: UploadFile, db: database.db_dependency):
 
     """
     Endpoint to process and import data from a CSV file.

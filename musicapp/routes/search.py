@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .. import database, models
+from .. import database, models, schemas
 from ..database import es
 from .auth import user_dep
 
@@ -9,8 +9,8 @@ router = APIRouter(
 )
 
 
-@router.get('/search/{query}')
-def search_query(query: str, user: user_dep):
+@router.post('/search')
+def search_query(user: user_dep, request : schemas.SearchQuery):
 
     """
     Search for songs and playlists based on a given query.
@@ -27,7 +27,7 @@ def search_query(query: str, user: user_dep):
     wildcard_query = {
         "query": {
             "query_string": {
-                "query": f"*{query}*"
+                "query": f"*{request.query}*"
             }
         },
         "size": 50
@@ -40,7 +40,7 @@ def search_query(query: str, user: user_dep):
     return response['hits']['hits']
 
 
-@router.get('/recommend')
+@router.post('/recommend')
 def recommend_song(user: user_dep, db: database.db_dependency):
 
     """
@@ -78,7 +78,7 @@ def recommend_song(user: user_dep, db: database.db_dependency):
                 "min_term_freq": 1,
                 "max_query_terms": 6,
                 "min_doc_freq": 1
-            }
+            },
         }
     }
 
@@ -87,3 +87,19 @@ def recommend_song(user: user_dep, db: database.db_dependency):
 
     # Return the recommended songs
     return response['hits']['hits']
+
+
+@router.post('/suggest')
+def suggest_item(db: database.db_dependency, user : user_dep, request : schemas.SuggestItem):
+    db_instance = models.Suggestion(
+        byUserId = user['id'], 
+        toUserId = request.toUserId, 
+        typeOfSuggestion = request.suggestedType, 
+        suggestedItem = request.suggestedItem
+    )
+
+    db.add(db_instance)
+    db.commit()
+    db.refresh(db_instance)
+
+    return {"detail" : "Suggestion Sent Successfully"}

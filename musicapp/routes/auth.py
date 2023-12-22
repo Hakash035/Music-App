@@ -34,7 +34,7 @@ def verify_password(hashed_pass, plain_text):
 # Creating the access token (JWT)
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + timedelta(minutes=60)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -57,7 +57,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         raise credentials_exception
     user = {
         "username": username,
-        "id": payload.get("id")
+        "id": payload.get("id"),
+        "role" : payload.get("role")
     }
     if user is None:
         raise credentials_exception
@@ -92,7 +93,7 @@ async def login_token(
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
 
-@router.post('/signup', status_code=200)
+@router.post('/signup', status_code=200, response_model=schemas.createUserResponse)
 def create_user(request: schemas.CreateUser, db: database.db_dependency):
 
     """

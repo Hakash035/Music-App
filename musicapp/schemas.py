@@ -18,6 +18,11 @@ class CreateUser(BaseModel):
 
 
 # Below classes are defined for response model
+class createUserResponse(BaseModel):
+    id : int
+    username : str
+    role : int
+
 class Artist(BaseModel):
     id : int
     artistName : str
@@ -48,6 +53,7 @@ class ShowRatingInfo(BaseModel):
     byUserId : User
 
 class ShowSong(BaseModel):
+    id : int
     songName : str
     artist : Artist
     genre : Genre
@@ -98,3 +104,40 @@ class EditSongRequest(BaseModel):
 
 class Playlist(BaseModel):
     playlistName : str
+
+class EditGenre(BaseModel):
+    genreId : int
+    editName : str    
+
+class PostGenre(BaseModel):
+    genre : str
+
+class PostRating(BaseModel):
+    songId : int
+    rating : float
+
+class PostAlbum(BaseModel):
+    artistId : int
+    albumName : str
+
+class EditAlbum(BaseModel):
+    albumId : int
+    name : str
+
+class PostArtist(BaseModel):
+    artist : str
+
+class EditArtist(BaseModel):
+    artistId : int
+    name : str
+
+class SearchQuery(BaseModel):
+    query : str
+
+class RecBasedOnSong(BaseModel):
+    songId : int
+
+class SuggestItem(BaseModel):
+    toUserId : int
+    suggestedType : str
+    suggestedItem : str

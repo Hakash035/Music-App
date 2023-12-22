@@ -8,7 +8,7 @@ class Songs(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     songName = Column(String)
-    fileName = Column(String)
+    # fileName = Column(String, default=None)
     artistId = Column(Integer, ForeignKey("artist.id", ondelete="CASCADE"))
     genreId = Column(Integer, ForeignKey("genre.id"))
     albumId = Column(Integer, ForeignKey("album.id", ondelete="CASCADE"))
@@ -94,3 +94,13 @@ class Rating(Base):
 
     users = relationship("Users", back_populates="rating")
     songs = relationship("Songs", back_populates="rating")
+
+
+class Suggestion(Base):
+    __tablename__ = "suggest"
+
+    id = Column(Integer, primary_key=True, index=True)
+    byUserId = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    toUserId = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    typeOfSuggestion = Column(String)
+    suggestedItem = Column(String)

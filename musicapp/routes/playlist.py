@@ -11,10 +11,7 @@ router = APIRouter(
     prefix="/playlist"
 )
 
-@router.get(
-        '/getall', 
-        status_code=status.HTTP_200_OK
-    )
+@router.get('/getall', status_code=status.HTTP_200_OK)
 def get_user_playlist(db: database.db_dependency, user: user_dep):
 
     """
@@ -119,7 +116,7 @@ def create_playlist(
     # Check if the playlist with the given name already exists
     existing_playlist = db.query(models.Playlist).filter(models.Playlist.playlistName == request.playlistName).first()
     
-    if existing_playlist:
+    if existing_playlist and existing_playlist.userId == user['id']:
         # Raise an HTTPException with a 302 status code if the playlist already exists
         raise HTTPException(
             status_code=status.HTTP_302_FOUND, 
@@ -176,7 +173,7 @@ def create_by_condition(
     """
 
     # Check if the playlist with the given name already exists
-    existing_playlist = db.query(models.Playlist).filter(models.Playlist.playlistName == request.playlistName).first()
+    existing_playlist = db.query(models.Playlist).filter(models.Playlist.playlistName == request.playlist).first()
     
     if existing_playlist:
         # Raise an HTTPException with a 302 status code if the playlist already exists
@@ -197,7 +194,7 @@ def create_by_condition(
                     "must": [{"match_phrase": {"artistName": pair[0]}}, {"match_phrase": {"genreName": pair[1]}}]
                 }
             },
-            "size": 25
+            "size": 5
         }
         response = es.search(index="songs", body=query)
         res += response['hits']['hits']
@@ -234,7 +231,7 @@ def create_by_condition(
     return { "detail" : "Playlist Created Successfully" }
 
 
-@router.put('/{playlistId}/add/{songId}', status_code=status.HTTP_200_OK)
+@router.patch('/{playlistId}/add/{songId}', status_code=status.HTTP_200_OK)
 def add_song_to_playlist(
         playlistId: int, 
         songId: int, 
@@ -309,7 +306,7 @@ def add_song_to_playlist(
     return { "detail" : "Song Added to the Playlist Successfully" }
 
 
-@router.delete('/{playlistId}/remove/{songId}')
+@router.patch('/{playlistId}/remove/{songId}')
 def del_song_from_playlist(
         user: user_dep, 
         playlistId: int, 

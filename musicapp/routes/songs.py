@@ -36,7 +36,7 @@ def show_song(db: database.db_dependency, songId: int):
     return song
 
 
-@router.put('/upload', response_model=schemas.ShowSong)
+@router.post('/upload', response_model=schemas.ShowSong)
 async def upload_songs(
     db: database.db_dependency,
     songName: str,
@@ -116,8 +116,7 @@ async def upload_songs(
         songName=songName,
         genreId=genreId,
         artistId=artistId,
-        albumId=albumId,
-        fileName=file_name
+        albumId=albumId
     )
     db.add(db_song)
     db.commit()
@@ -232,6 +231,7 @@ def delete_song(
     """
 
     # Check if the user has admin privileges
+
     if user['role'] != 1:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 

@@ -43,12 +43,11 @@ def get_album(
     return album
 
 
-@router.post('/create/{artistId}/{albumName}')
+@router.post('/create')
 def create_album(
     db: database.db_dependency,
-    albumName: str,
-    artistId: int,
-    user: user_dep
+    user: user_dep,
+    request : schemas.PostAlbum
 ):
     
     """
@@ -76,8 +75,8 @@ def create_album(
 
     # Check if the album with the given name and artist ID already exists
     existing_album = db.query(models.Album).filter(
-        models.Album.albumName == albumName,
-        models.Album.artistId == artistId
+        models.Album.albumName == request.albumName,
+        models.Album.artistId == request.artistId
     ).first()
 
     if existing_album:
@@ -87,7 +86,7 @@ def create_album(
         )
 
     # Create a new album instance
-    album = models.Album(albumName=albumName, artistId=artistId)
+    album = models.Album(albumName=request.albumName, artistId=request.artistId)
 
     # Add the new album to the database
     db.add(album)
@@ -98,12 +97,11 @@ def create_album(
     return {"detail": "Album Created Successfully"}
 
 
-@router.put('/update/{albumId}/{name}')
+@router.put('/update')
 def update_album(
     db: database.db_dependency,
-    name: str,
-    albumId: int,
-    user: user_dep
+    user: user_dep,
+    request : schemas.EditAlbum
 ):
     
     """
@@ -130,7 +128,7 @@ def update_album(
         )
 
     # Retrieve the album by ID
-    album = db.query(models.Album).filter(models.Album.id == albumId).first()
+    album = db.query(models.Album).filter(models.Album.id == request.albumId).first()
 
     # Check if the album exists
     if not album:
@@ -140,7 +138,7 @@ def update_album(
         )
 
     # Update the album name
-    album.albumName = name
+    album.albumName = request.name
     db.commit()
     db.refresh(album)
 

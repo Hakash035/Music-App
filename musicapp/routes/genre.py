@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from .. import database, models
+from .. import database, models, schemas
 from .auth import user_dep
 
 router = APIRouter(
@@ -25,11 +25,11 @@ def get_all_genre(db: database.db_dependency):
     return all_genre
 
 
-@router.post('/create/{genre}')
+@router.post('/create')
 def create_genre(
     db: database.db_dependency,
-    genre: str,
-    user: user_dep
+    user: user_dep,
+    request : schemas.PostGenre
 ):
     
     """
@@ -55,7 +55,7 @@ def create_genre(
         )
 
     # Check if the genre with the given name already exists
-    existing_genre = db.query(models.Genre).filter(models.Genre.genreName == genre).first()
+    existing_genre = db.query(models.Genre).filter(models.Genre.genreName == request.genre).first()
     if existing_genre:
         raise HTTPException(
             status_code=status.HTTP_302_FOUND, 
@@ -63,7 +63,7 @@ def create_genre(
         )
 
     # Create a new genre instance
-    db_genre = models.Genre(genreName=genre)
+    db_genre = models.Genre(genreName=request.genre)
 
     # Add the new genre to the database
     db.add(db_genre)
@@ -74,12 +74,11 @@ def create_genre(
     return {"detail": "Genre Created Successfully"}
 
 
-@router.put('/edit/{genreId}/{editName}')
+@router.put('/edit')
 def edit_genre(
     db: database.db_dependency,
-    genreId: int,
-    editName: str,
-    user: user_dep
+    user: user_dep,
+    request : schemas.EditGenre
 ):
     
     """
@@ -106,7 +105,7 @@ def edit_genre(
         )
 
     # Retrieve the genre instance by ID
-    genre_instance = db.query(models.Genre).filter(models.Genre.id == genreId).first()
+    genre_instance = db.query(models.Genre).filter(models.Genre.id == request.genreId).first()
 
     # Check if the genre with the given ID exists
     if not genre_instance:
@@ -116,7 +115,7 @@ def edit_genre(
         )
 
     # Check if a genre with the new name already exists
-    existing_genre = db.query(models.Genre).filter(models.Genre.genreName == editName).first()
+    existing_genre = db.query(models.Genre).filter(models.Genre.genreName == request.editName).first()
     if existing_genre:
         raise HTTPException(
             status_code=status.HTTP_302_FOUND, 
@@ -124,7 +123,7 @@ def edit_genre(
         )
 
     # Update the genre name
-    genre_instance.genreName = editName
+    genre_instance.genreName = request.editName
     db.commit()
     db.refresh(genre_instance)
 
