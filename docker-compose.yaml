@@ -4,8 +4,6 @@ services:
     build: .
     ports:
       - "80:80"
-    networks:
-      - my-network
     depends_on:
       - postgres-db
     
@@ -15,7 +13,4 @@ services:
       POSTGRES_DB: musicApp
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
-    
-networks:
-  my-network:
-    driver : bridge
+
