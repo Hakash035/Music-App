@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, status
 from .. import database, models, schemas
 from .auth import user_dep
 
+from ..services import databaseServices, accessControl
+
 
 router = APIRouter(
     tags = ["Artist"],
@@ -29,17 +31,7 @@ def get_artist_info(
     - ShowArtistDetails: Information about the artist.
     """
 
-    # Retrieve the artist by ID
-    artist = db.query(models.Artist).filter(models.Artist.id == artistId).first()
-
-    # Check if the artist exists
-    if not artist:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Artist Not Found"
-        )
-
-    # Return artist information
+    artist = databaseServices.retrive_artist_by_id(artistId)
     return artist
 
 
@@ -65,28 +57,16 @@ def create_artist(
     - dict: Success message if creation is successful.
     """
 
-    # Check if the user is an admin
-    if user['role'] != 1:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Only Admins can Create Artists!"
-        )
+    accessControl.admin_access(user, "Create", "Artist")
 
     # Check if the artist with the given name already exists
-    existing_artist = db.query(models.Artist).filter(models.Artist.artistName == request.artist).first()
-    if existing_artist:
-        raise HTTPException(
-            status_code=status.HTTP_302_FOUND, 
-            detail="Artist already Exists"
-        )
+    databaseServices.check_if_artist_exist(request)
 
     # Create a new artist instance
     new_artist = models.Artist(artistName=request.artist)
 
     # Add the new artist to the database
-    db.add(new_artist)
-    db.commit()
-    db.refresh(new_artist)
+    databaseServices.add_commit_refresh(new_artist)
 
     # Return success message
     return {"detail": "Artist Created Successfully"}
@@ -116,11 +96,7 @@ def update_artist(
     """
 
     # Check if the user is an admin
-    if user['role'] != 1:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Only Admins can Update Artists!"
-        )
+    accessControl.admin_access(user, "Update", "Artist")
 
     # Retrieve the artist by ID
     artist = db.query(models.Artist).filter(models.Artist.id == request.artistId).first()

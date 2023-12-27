@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from .. import database, models, schemas
 from .auth import user_dep
+from ..services import accessControl, databaseServices
 
 router = APIRouter(
     tags = ["Genre"],
@@ -48,27 +49,16 @@ def create_genre(
     """
 
     # Check if the user is an admin
-    if user['role'] != 1:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Only Admins can Create Genre!"
-        )
+    accessControl.admin_access(user, "Create", "Genre")
 
     # Check if the genre with the given name already exists
-    existing_genre = db.query(models.Genre).filter(models.Genre.genreName == request.genre).first()
-    if existing_genre:
-        raise HTTPException(
-            status_code=status.HTTP_302_FOUND, 
-            detail="Genre Already Exists!"
-        )
+    databaseServices.check_if_genre_exist(request)
 
     # Create a new genre instance
     db_genre = models.Genre(genreName=request.genre)
 
     # Add the new genre to the database
-    db.add(db_genre)
-    db.commit()
-    db.refresh(db_genre)
+    databaseServices.add_commit_refresh(db_genre)
 
     # Return success message
     return {"detail": "Genre Created Successfully"}
@@ -98,34 +88,17 @@ def edit_genre(
     """
 
     # Check if the user is an admin
-    if user['role'] != 1:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Only Admins can Update Genre!"
-        )
-
-    # Retrieve the genre instance by ID
-    genre_instance = db.query(models.Genre).filter(models.Genre.id == request.genreId).first()
+    accessControl.admin_access(user, "Update", "Genre")
 
     # Check if the genre with the given ID exists
-    if not genre_instance:
-        raise HTTPException(
-            status_code=404, 
-            detail="Genre ID Not Found"
-        )
+    genre_instance = databaseServices.check_if_genreId_exist(request)
 
     # Check if a genre with the new name already exists
-    existing_genre = db.query(models.Genre).filter(models.Genre.genreName == request.editName).first()
-    if existing_genre:
-        raise HTTPException(
-            status_code=status.HTTP_302_FOUND, 
-            detail="Genre Already Exists!"
-        )
+    databaseServices.check_if_genre_exist(request)
 
     # Update the genre name
-    genre_instance.genreName = request.editName
-    db.commit()
-    db.refresh(genre_instance)
+    genre_instance.genreName = request.genre
+    databaseServices.commit_refresh(genre_instance)
 
     # Return success message
     return {"detail": "Genre Updated Successfully"}
@@ -154,25 +127,13 @@ def delete_genre(
     """
 
     # Check if the user is an admin
-    if user['role'] != 1:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Only Admins can Delete Genre!"
-        )
-
-    # Retrieve the genre instance by ID
-    genre_instance = db.query(models.Genre).filter(models.Genre.id == genreId).first()
+    accessControl.admin_access(user, "Delete", "Genre")
 
     # Check if the genre exists
-    if not genre_instance:
-        raise HTTPException(
-            status_code=404, 
-            detail="Genre ID Not Found"
-        )
+    genre_instance = databaseServices.check_if_genreId_exist(request={genreId : genreId})
 
     # Delete the genre
-    db.delete(genre_instance)
-    db.commit()
+    databaseServices.delete_commit(genre_instance)
 
     # Return success message
     return {"detail": "Genre deleted successfully"}

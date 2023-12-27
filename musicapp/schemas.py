@@ -8,7 +8,7 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: str
 
 class CreateUser(BaseModel):
     username : str
@@ -107,7 +107,7 @@ class Playlist(BaseModel):
 
 class EditGenre(BaseModel):
     genreId : int
-    editName : str    
+    genre : str    
 
 class PostGenre(BaseModel):
     genre : str

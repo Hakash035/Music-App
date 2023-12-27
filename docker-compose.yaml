@@ -1,0 +1,21 @@
+version: "3"
+services:
+  fastapi-app:
+    build: .
+    ports:
+      - "80:80"
+    networks:
+      - my-network
+    depends_on:
+      - postgres-db
+    
+  postgres-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: musicApp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    
+networks:
+  my-network:
+    driver : bridge
