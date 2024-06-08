@@ -8,7 +8,7 @@ from .database import es
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",
+    "0.0.0.0"
 ]
 
 
