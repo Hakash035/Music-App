@@ -8,3 +8,4 @@ uuid
 psycopg2
 bcrypt
 python-dotenv
+elasticsearch
