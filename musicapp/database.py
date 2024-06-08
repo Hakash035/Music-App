@@ -46,5 +46,5 @@ ELASTICSEARCH_PASSWORD = os.environ.get("ELASTICSEARCH_PASSWORD")
 es = Elasticsearch(
     hosts=ELASTICSEARCH_URL,
     basic_auth=(ELASTICSEARCH_USER, ELASTICSEARCH_PASSWORD),
-    verify_certs=False
+    verify_certs=True
 )
